@@ -39,8 +39,8 @@
     <section class="card" aria-labelledby="plots-title"><div class="row between"><h2 id="plots-title">실시간 6축 신호</h2><button id="freeze" class="small" disabled>그래프 일시정지</button></div><div class="plot-section" style="margin-top:17px"><div class="row between plot-head"><h3>가속도 <small>g</small></h3><div class="legend"><i class="swatch sx"></i>X　<i class="swatch sy"></i>Y　<i class="swatch sz"></i>Z</div></div><canvas id="acc-plot" class="plot" aria-label="최근 10초 동안의 X, Y, Z 가속도 그래프. 단위 g."></canvas></div><div class="plot-section"><div class="row between plot-head"><h3>각속도 <small>°/s</small></h3><div class="legend"><i class="swatch sx"></i>X　<i class="swatch sy"></i>Y　<i class="swatch sz"></i>Z</div></div><canvas id="gyro-plot" class="plot" aria-label="최근 10초 동안의 X, Y, Z 각속도 그래프. 단위 도 매 초."></canvas></div><p id="chart-state" class="chart-controls">최근 10초 · 가속도/각속도 별도 자동 눈금 · 실제 측정 시각 기준</p></section>
     <section class="card" aria-labelledby="record-title"><h2 id="record-title"><span class="number">02</span>라벨 선택 · 동작 수집</h2><div class="settings"><div><label for="label">동작 라벨</label><input id="label" value="still" maxlength="32" autocomplete="off" spellcheck="false"><div class="chips"><button data-label="still">still</button><button data-label="updown">updown</button><button data-label="rotate">rotate</button></div></div><div><label for="session">학생 / 세션 ID</label><input id="session" value="s01" maxlength="32" autocomplete="off" spellcheck="false"><small>영문·숫자·_·- 사용</small></div><div class="field-wide"><label for="seconds">수집 시간</label><select id="seconds"><option value="3">3초</option><option value="5">5초</option><option value="10" selected>10초</option><option value="20">20초</option><option value="30">30초</option><option value="60">60초</option></select></div><div class="field-wide"><label for="axes">CSV에 저장할 센서축</label><select id="axes"><option value="6">가속도 3축 + 각속도 3축 · 6축</option><option value="3">가속도 3축만</option></select></div></div><div class="record-actions"><button id="record" class="primary" disabled>동작 수집 시작</button><button id="stop-record" disabled>수집 중지</button></div><progress id="record-progress" class="record-progress" value="0" max="100" aria-label="동작 수집 진행률"></progress><p id="record-info" class="record-info">연결 후 동작을 준비하고 수집 시작을 누르세요.</p><div class="record-note">관찰 중에는 파일이 만들어지지 않습니다. 수집 버튼을 누른 구간만 목록에 추가됩니다.<br>그래프를 일시정지해도 센서 수신과 수집은 계속됩니다.<br>한 샘플에는 한 동작만 담고, 학생·세션 ID로 수집 기록을 구분하세요.</div></section>
   </div>
-  <section class="card review" aria-labelledby="review-title"><div class="row between"><h2 id="review-title"><span class="number">03</span>수집한 데이터 <span id="record-count" class="pill">0개</span></h2><button id="save-zip" class="primary" disabled>전체 CSV를 ZIP으로 저장</button></div><p>CSV에는 시간과 선택한 3축 또는 6축의 센서 측정값을 저장합니다. <strong>이 창을 닫거나 새로고침하기 전에 저장하세요.</strong></p><div id="records" class="record-list"><div class="empty">아직 수집한 동작이 없습니다.</div></div></section>
-  <details class="card help"><summary>처음 사용하시나요? · 배선, 보정, CSV와 문제 해결</summary><ol><li><strong>esp32_motion_capture.ino</strong>를 Arduino IDE에서 열고 <strong>Adafruit MPU6050</strong>과 의존 라이브러리를 설치합니다.</li><li>보드를 XIAO_ESP32S3 또는 ESP32S3 Dev Module로 선택해 업로드합니다. 시리얼 모니터와 플로터를 닫습니다.</li><li>이 페이지에서 <strong>USB 보드 연결</strong>을 누르고 포트를 선택합니다.</li><li>센서를 수평으로 놓고 <strong>정지 보정 · 2초</strong>를 누릅니다. 센서의 축 방향을 확인하며 기울이거나 회전시킵니다.</li><li>라벨·학생/세션·저장할 센서축을 지정해 수집하고 센서 CSV 또는 ZIP으로 저장합니다.</li></ol><table><thead><tr><th>MPU6050</th><th>XIAO ESP32S3</th><th>WROOM N16R8</th></tr></thead><tbody><tr><td>SDA</td><td>D4 / GPIO5</td><td>GPIO7</td></tr><tr><td>SCL</td><td>D5 / GPIO6</td><td>GPIO6</td></tr><tr><td>GND</td><td>GND</td><td>GND</td></tr><tr><td>VCC</td><td colspan="2">3V3 입력 지원 모듈은 3V3. 모듈별 전원 정격 확인.</td></tr></tbody></table><ul><li>USB 직접 연결: <strong>USB Mode = Hardware CDC and JTAG, USB CDC On Boot = Enabled</strong>. USB-UART 포트 사용: <strong>USB CDC On Boot = Disabled</strong>. WROOM N16R8은 Flash=16MB, PSRAM=OPI입니다.</li><li>강의의 Freenove WROOM CAM은 카메라가 GPIO6·7을 사용하므로 모션 실습 전에 카메라 리본 케이블을 분리하세요. 앞선 INMP441 배선도 분리합니다. SDA/SCL의 풀업 전압은 3.3V여야 합니다. 기본 코드에서는 AD0를 GND(0x68)에 연결합니다. AD0가 3V3이면 코드의 MPU_ADDRESS를 0x69로 변경합니다.</li><li>센서를 정지시켜도 가속도에는 중력이 포함됩니다. 각속도는 회전하는 동안 변하고, 멈추면 0 근처로 돌아옵니다.</li><li>정지 보정은 자이로의 일정한 오차를 3D 계산에서만 뺍니다. 현재 자세 0°는 모형의 기준을 바꾸며, 정지 보정을 대신하지 않습니다.</li><li>자력계가 없으므로 Yaw는 절대 방위가 아닙니다. 오래 두면 회전 오차가 생길 수 있습니다. 빠른 흔들기 중에는 자세 추정이 덜 정확할 수 있습니다.</li><li>그래프의 빈 구간은 수신 누락입니다. 실제 시각을 유지하며 임의의 샘플을 채우지 않습니다. 큰 간격이나 수신 오류가 있으면 다시 수집하세요.</li><li>CSV 첫 열 <code>timestamp</code>는 ms입니다. 가속도는 g, 각속도는 °/s입니다. CSV에는 선택한 센서축의 측정값만 저장합니다.</li><li>ZIP의 <strong>data/6axis</strong> 또는 <strong>data/3axis</strong>에서 같은 축 구성의 CSV를 모아 사용합니다. 학습·테스트 구분은 수집 후에 파일·학생·세션 단위로 진행하세요. 주파수는 50Hz, 축 개수와 단위는 수집·추론에서 일치시킵니다.</li><li>예전 <code>mpu6050_collect.ino</code>의 7열 출력도 읽을 수 있지만 온도는 표시되지 않습니다. 이번 8열 코드 업로드를 권장합니다.</li><li>데이터는 브라우저 메모리에만 보관됩니다. 촬영·녹음 도구처럼 CSV/ZIP 다운로드가 필요합니다. 서버 전송이나 Edge Impulse 자동 업로드는 수행하지 않습니다.</li></ul></details>
+  <section class="card review" aria-labelledby="review-title"><div class="row between"><h2 id="review-title"><span class="number">03</span>수집한 데이터 <span id="record-count" class="pill">0개</span></h2><button id="save-zip" class="primary" disabled>전체 CSV를 ZIP으로 저장</button></div><p>CSV에는 시간과 선택한 3축 또는 6축의 센서값만 저장합니다. <strong>이 창을 닫거나 새로고침하기 전에 저장하세요.</strong></p><div style="max-width:380px;margin-top:14px"><label for="csv-format">CSV 저장 형식</label><select id="csv-format" aria-describedby="csv-format-note"><option value="edgeimpulse">Edge Impulse용 · 50Hz</option><option value="raw">센서 원측정값 · 실제 시각</option></select></div><p id="csv-format-note">Edge Impulse용은 측정값 사이를 선형 보간해 20ms 간격으로 저장합니다. 원측정값 형식은 실제 시각과 값을 유지합니다. 40ms를 넘는 누락은 보간하지 않습니다.</p><p>Edge Impulse: ZIP을 풀고 같은 축 구성의 CSV만 선택 → Data acquisition → Upload data. 파일명에서 라벨을 가져오고, 가속도 g·각속도 °/s를 추론 때도 동일하게 사용하세요.</p><div id="records" class="record-list"><div class="empty">아직 수집한 동작이 없습니다.</div></div></section>
+  <details class="card help"><summary>처음 사용하시나요? · 배선, 보정, CSV와 문제 해결</summary><ol><li><strong>esp32_motion_capture.ino</strong>를 Arduino IDE에서 열고 <strong>Adafruit MPU6050</strong>과 의존 라이브러리를 설치합니다.</li><li>보드를 XIAO_ESP32S3 또는 ESP32S3 Dev Module로 선택해 업로드합니다. 시리얼 모니터와 플로터를 닫습니다.</li><li>이 페이지에서 <strong>USB 보드 연결</strong>을 누르고 포트를 선택합니다.</li><li>센서를 수평으로 놓고 <strong>정지 보정 · 2초</strong>를 누릅니다. 센서의 축 방향을 확인하며 기울이거나 회전시킵니다.</li><li>라벨·학생/세션·저장할 센서축을 지정해 수집하고 센서 CSV 또는 ZIP으로 저장합니다.</li></ol><table><thead><tr><th>MPU6050</th><th>XIAO ESP32S3</th><th>WROOM N16R8</th></tr></thead><tbody><tr><td>SDA</td><td>D4 / GPIO5</td><td>GPIO7</td></tr><tr><td>SCL</td><td>D5 / GPIO6</td><td>GPIO6</td></tr><tr><td>GND</td><td>GND</td><td>GND</td></tr><tr><td>VCC</td><td colspan="2">3V3 입력 지원 모듈은 3V3. 모듈별 전원 정격 확인.</td></tr></tbody></table><ul><li>USB 직접 연결: <strong>USB Mode = Hardware CDC and JTAG, USB CDC On Boot = Enabled</strong>. USB-UART 포트 사용: <strong>USB CDC On Boot = Disabled</strong>. WROOM N16R8은 Flash=16MB, PSRAM=OPI입니다.</li><li>강의의 Freenove WROOM CAM은 카메라가 GPIO6·7을 사용하므로 모션 실습 전에 카메라 리본 케이블을 분리하세요. 앞선 INMP441 배선도 분리합니다. SDA/SCL의 풀업 전압은 3.3V여야 합니다. 기본 코드에서는 AD0를 GND(0x68)에 연결합니다. AD0가 3V3이면 코드의 MPU_ADDRESS를 0x69로 변경합니다.</li><li>센서를 정지시켜도 가속도에는 중력이 포함됩니다. 각속도는 회전하는 동안 변하고, 멈추면 0 근처로 돌아옵니다.</li><li>정지 보정은 자이로의 일정한 오차를 3D 계산에서만 뺍니다. 현재 자세 0°는 모형의 기준을 바꾸며, 정지 보정을 대신하지 않습니다.</li><li>자력계가 없으므로 Yaw는 절대 방위가 아닙니다. 오래 두면 회전 오차가 생길 수 있습니다. 빠른 흔들기 중에는 자세 추정이 덜 정확할 수 있습니다.</li><li>그래프와 원측정값 CSV는 실제 측정 시각을 유지합니다. Edge Impulse용 CSV는 측정값 사이를 선형 보간해 20ms 간격(50Hz)으로 저장하며 마지막 측정 시각 밖으로 연장하지 않습니다. 40ms를 넘는 수신 누락은 재수집하거나 원측정값으로 보존하세요.</li><li>CSV 첫 열 <code>timestamp</code>는 ms입니다. 가속도는 g, 각속도는 °/s입니다. CSV에는 시간과 선택한 센서축만 있으며 온도·자세각은 없습니다. 정지 보정은 CSV에 영점 보정을 적용하지 않습니다.</li><li>ZIP의 <strong>data/6axis</strong> 또는 <strong>data/3axis</strong>에서 같은 축 구성의 CSV를 모아 사용합니다. 학습·테스트 구분은 수집 후에 파일·학생·세션 단위로 진행하세요. Edge Impulse용 CSV는 50Hz이고, 원측정값 CSV의 실제 주파수는 수집 상태에 따라 달라집니다. 축 개수와 단위는 수집·추론에서 일치시킵니다.</li><li>예전 <code>mpu6050_collect.ino</code>의 7열 출력도 읽을 수 있지만 온도는 표시되지 않습니다. 이번 8열 코드 업로드를 권장합니다.</li><li>데이터는 브라우저 메모리에만 보관됩니다. 촬영·녹음 도구처럼 CSV/ZIP 다운로드가 필요합니다. 서버 전송이나 Edge Impulse 자동 업로드는 수행하지 않습니다. Edge Impulse에는 ZIP을 푼 뒤 CSV만 업로드하고, 파일명 첫 마침표 앞을 라벨로 사용합니다. 기존 CSV Wizard 설정이 있다면 timestamp(ms)와 센서축 매핑이 맞는지 확인하세요.</li></ul></details>
   <footer class="footer">MPU6050 → USB → Chrome → CSV · 페이지를 연 뒤 관찰과 수집은 인터넷 없이 가능합니다.</footer>
 </main>
 <script id="motion-core">
@@ -108,10 +108,32 @@
     }
     finish(reason="complete"){const duration=this.rows.at(-1)?.[0]??0;return {...this.settings,rows:this.rows,reason,maxGap:this.maxGap,durationMs:duration,measuredHz:duration&&this.rows.length>1?(this.rows.length-1)*1000/duration:0};}
   }
-  function csvFor(record){
+  function edgeImpulseRows(record){
+    const error=detail=>new Error(`Edge Impulse용 CSV: ${detail} 다시 수집하거나 저장 형식을 '센서 원측정값 · 실제 시각'으로 바꾸세요.`);
+    if(!record||![3,6].includes(Number(record.axes))||!Array.isArray(record.rows)||record.rows.length<2)throw error("센서 샘플이 부족하거나 축 구성이 잘못되었습니다.");
+    const n=Number(record.axes)+1,rows=record.rows;
+    for(let i=0;i<rows.length;i++){
+      const row=rows[i];
+      if(!Array.isArray(row)||row.length!==n||!row.every(v=>typeof v==="number"&&Number.isFinite(v))||row[0]<0)throw error("숫자가 아닌 값 또는 잘못된 행이 있습니다.");
+      if(i===0&&row[0]!==0)throw error("첫 측정 시각이 0ms가 아닙니다.");
+      if(i&&row[0]<=rows[i-1][0])throw error("측정 시각이 증가하지 않습니다.");
+      if(i&&row[0]-rows[i-1][0]>40)throw error("40ms를 넘는 수신 누락 구간이 있습니다.");
+    }
+    const result=[],last=rows.at(-1)[0];let right=1;
+    for(let t=0;t<=last;t+=20){
+      while(right<rows.length-1&&rows[right][0]<t)right++;
+      const a=rows[right-1],b=rows[right],fraction=(t-a[0])/(b[0]-a[0]);
+      result.push([t,...a.slice(1).map((v,i)=>v+(b[i+1]-v)*fraction)]);
+    }
+    if(result.length<2)throw error("20ms 간격으로 저장할 샘플이 부족합니다.");
+    return result;
+  }
+  function csvFor(record,format="edgeimpulse"){
+    if(!["edgeimpulse","raw"].includes(format))throw new Error("CSV 저장 형식을 확인하세요.");
     const n=Number(record.axes)===3?4:7;
     const header=["timestamp","accX","accY","accZ","gyrX","gyrY","gyrZ"].slice(0,n);
-    return header.join(",")+"\r\n"+record.rows.map(row=>row.slice(0,n).map((v,i)=>i===0?String(v):Number(v).toFixed(5)).join(",")).join("\r\n")+"\r\n";
+    const rows=format==="edgeimpulse"?edgeImpulseRows(record):record.rows;
+    return header.join(",")+"\r\n"+rows.map(row=>row.slice(0,n).map((v,i)=>i===0?String(v):Number(v).toFixed(5)).join(",")).join("\r\n")+"\r\n";
   }
   const crcTable=Array.from({length:256},(_,n)=>{for(let k=0;k<8;k++)n=(n>>>1)^((n&1)?0xedb88320:0);return n>>>0;});
   function crc32(bytes){let crc=0xffffffff;for(const b of bytes)crc=(crc>>>8)^crcTable[(crc^b)&255];return (crc^0xffffffff)>>>0;}
@@ -123,7 +145,7 @@
     }
     const end=new Uint8Array(22),v=new DataView(end.buffer);v.setUint32(0,0x06054b50,true);v.setUint16(8,files.length,true);v.setUint16(10,files.length,true);v.setUint32(12,size,true);v.setUint32(16,offset,true);return new Blob([...local,...central,end],{type:"application/zip"});
   }
-  window.MotionCore={clamp,rad,deg,norm,conj,multiply,rotate,fromEuler,toEuler,shakeDemoAt,parseSample,LineBuffer,Attitude,calibrationBias,Capture,csvFor,crc32,makeZip};
+  window.MotionCore={clamp,rad,deg,norm,conj,multiply,rotate,fromEuler,toEuler,shakeDemoAt,parseSample,LineBuffer,Attitude,calibrationBias,Capture,edgeImpulseRows,csvFor,crc32,makeZip};
 })();
 </script>
 <script id="motion-app">
@@ -288,7 +310,12 @@
     status(`${record.label} ${full?"수집 완료":"중간 구간을 보존했습니다"}. ${record.rows.length}행${gap?" · 수신 간격을 확인하고 필요하면 재수집하세요.":" · 목록에서 CSV로 저장할 수 있습니다."}`,gap);
   }
   function download(blob,filename){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
-  function saveCsv(record){download(new Blob([C.csvFor(record)],{type:"text/csv;charset=utf-8"}),record.filename);status("센서 CSV 다운로드를 요청했습니다. 다운로드 폴더에서 확인하세요.");}
+  function csvFormat(){return $("csv-format").value;}
+  function formatName(format){return format==="edgeimpulse"?"Edge Impulse용 50Hz":"센서 원측정값";}
+  function saveCsv(record){
+    try{const format=csvFormat();download(new Blob([C.csvFor(record,format)],{type:"text/csv;charset=utf-8"}),record.filename);status(`${formatName(format)} CSV 다운로드를 요청했습니다. 다운로드 폴더에서 확인하세요.`);}
+    catch(error){status(error.message,true);}
+  }
   function renderRecords(){
     $("record-count").textContent=`${records.length}개`;const list=$("records");list.replaceChildren();
     if(!records.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="아직 수집한 동작이 없습니다.";list.append(empty);}
@@ -304,11 +331,21 @@
     }
   }
   function saveZip(){
-    if(!records.length||capture)return;const files=[];
-    for(const r of records){const root=r.source==="demo"?"demo":"data";files.push({name:`${root}/${r.axes}axis/${r.filename}`,bytes:encoder.encode(C.csvFor(r))});}
-    const metadata={format:"ESP32_MOTION_DATASET_V2",createdAt:new Date().toISOString(),units:{timestamp:"ms",acceleration:"g",angularVelocity:"deg/s"},targetHz:50,records:records.map(({rows,...meta})=>({...meta,sampleCount:rows.length}))};
-    const notes="ESP32 모션 스튜디오 데이터\n\n1. data/6axis 또는 data/3axis에 센서 CSV를 모았습니다. 3축·6축을 섞지 마세요.\n2. 수집할 때 학습용·테스트용을 나누지 않습니다. 학습 전에 파일·학생·세션 단위로 분할하세요.\n3. CSV에는 timestamp와 선택한 센서축의 측정값만 들어 있습니다. 추정각도는 저장하지 않습니다.\n4. 첫 마침표 앞이 동작 라벨입니다. 주파수 50Hz, timestamp는 ms, 가속도 g, 각속도 deg/s입니다.\n5. demo 폴더는 모의 데이터이며 실제 학습·평가 데이터가 아닙니다.\n6. partial 이름은 수동 중지/연결 오류로 끝난 구간입니다. 품질을 확인하고 사용하세요.\n7. dataset.json은 단위, 실제 주파수, 학생·세션 등 수집 기록입니다.\n";
-    files.push({name:"dataset.json",bytes:encoder.encode(JSON.stringify(metadata,null,2))},{name:"README_데이터안내.txt",bytes:encoder.encode(notes)});download(C.makeZip(files),`esp32_motion_${stamp()}.zip`);savedRevision=revision;status(`${records.length}개 샘플의 ZIP 다운로드를 요청했습니다. 다운로드 폴더에서 확인하세요.`);
+    if(!records.length||capture)return;
+    try{
+      const files=[],format=csvFormat(),exportRecords=[];
+      for(const r of records){
+        const root=r.source==="demo"?"demo":"data";let csv;
+        try{csv=C.csvFor(r,format);}catch(error){throw new Error(`${r.filename}: ${error.message}`);}
+        files.push({name:`${root}/${r.axes}axis/${r.filename}`,bytes:encoder.encode(csv)});
+        const {rows,...meta}=r;
+        exportRecords.push({...meta,sampleCount:rows.length,exportFormat:format,exportedSampleCount:csv.trim().split("\r\n").length-1,exportedHz:format==="edgeimpulse"?50:r.measuredHz});
+      }
+      const csvExport={format,intervalMs:format==="edgeimpulse"?20:null,frequencyHz:format==="edgeimpulse"?50:null,method:format==="edgeimpulse"?"linear-interpolation":"original-measurements",maxInterpolationGapMs:format==="edgeimpulse"?40:null,extrapolation:false};
+      const metadata={format:"ESP32_MOTION_DATASET_V3",createdAt:new Date().toISOString(),units:{timestamp:"ms",acceleration:"g",angularVelocity:"deg/s"},targetHz:50,csvExport,records:exportRecords};
+      const notes=`ESP32 모션 스튜디오 데이터\n\n저장 형식: ${formatName(format)}\n${format==="edgeimpulse"?"측정값 사이를 선형 보간해 timestamp 0,20,40,...ms(50Hz)로 저장했습니다. 40ms를 넘는 누락은 허용하지 않으며 마지막 측정 시각 밖으로 연장하지 않습니다. CSV 값에는 보간값이 포함될 수 있습니다.":"실제 측정 시각과 센서값을 유지했습니다. 간격은 일정하지 않을 수 있으므로 Edge Impulse에 바로 올릴 때는 20ms 일정 간격인지 확인하거나 스튜디오의 Edge Impulse용 형식으로 다시 저장하세요."}\n\n1. data/6axis 또는 data/3axis에 CSV를 모았습니다. 3축·6축을 섞지 마세요.\n2. CSV는 timestamp(ms)와 선택한 센서축만 저장합니다. 가속도 g, 각속도 deg/s이며 온도·추정각도·영점 보정값은 저장하지 않습니다.\n3. Edge Impulse: ZIP 압축을 풀고 같은 축 구성의 CSV만 Data acquisition → Upload data에서 선택하세요. dataset.json과 이 안내문은 업로드하지 않습니다.\n4. 파일명 첫 마침표 앞이 동작 라벨입니다. 파일명에서 라벨을 추론하도록 선택하세요. 학습·추론의 축 순서와 단위를 일치시키세요. 가속도를 m/s²로 자동 변환하지 않습니다.\n5. 수집 시 학습·테스트를 나누지 않습니다. 업로드 전에 파일·학생·세션 단위로 나누고 같은 사람의 겹치는 구간이 양쪽에 들어가지 않게 하세요.\n6. demo 폴더는 모의 데이터이며 실제 학습·평가에서 제외합니다. partial은 수동 중지/연결 오류로 끝난 구간이니 품질을 확인하세요.\n7. dataset.json의 sampleCount는 원측정 행 수, exportedSampleCount는 CSV 행 수입니다. 보간 방법은 csvExport에, 단위와 실제 수집 주파수·학생/세션 정보는 해당 항목에 기록했습니다.\n8. 기존 CSV Wizard 설정이 있다면 timestamp(ms)와 센서축 매핑을 확인하세요.\n`;
+      files.push({name:"dataset.json",bytes:encoder.encode(JSON.stringify(metadata,null,2))},{name:"README_데이터안내.txt",bytes:encoder.encode(notes)});download(C.makeZip(files),`esp32_motion_${format}_${stamp()}.zip`);savedRevision=revision;status(`${formatName(format)} ${records.length}개 샘플의 ZIP 다운로드를 요청했습니다. 다운로드 폴더에서 확인하세요.`);
+    }catch(error){status(error.message,true);}
   }
 
   function setupCanvas(canvas){const box=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=box.width,h=box.height;if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}const ctx=canvas.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};}
