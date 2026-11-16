@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESP32 오디오 수집기</title>
+<style>
+  :root{font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;color:#173332;background:#f4f7f6;line-height:1.6}
+  *{box-sizing:border-box}body{margin:0}main{max-width:1000px;margin:auto;padding:38px 24px 60px}
+  h1{font-size:32px;letter-spacing:-1.3px;line-height:1.25;margin:8px 0 12px}h2{font-size:19px;margin:0 0 16px}
+  p{margin:8px 0}a{color:#08746b}.eyebrow{font-size:12px;font-weight:750;letter-spacing:2px;color:#08746b}
+  .muted,small{color:#58716d}.card{background:white;border:1px solid #dbe5e0;border-radius:16px;padding:24px;margin-top:20px}
+  .steps{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.steps span{background:#e1eeea;padding:6px 13px;border-radius:20px;font-size:13px}
+  button,.download{font:inherit;font-size:14px;font-weight:650;border:1px solid #bfd3ca;border-radius:9px;padding:10px 16px;background:#fff;color:#173332;cursor:pointer;text-decoration:none;display:inline-block}
+  button.primary{background:#0c7068;color:white;border-color:#0c7068}button:disabled{opacity:.4;cursor:default}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #e7b757;outline-offset:3px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row.between{justify-content:space-between}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  label{font-size:13px;font-weight:650;display:block}input,select{font:inherit;width:100%;padding:10px;border:1px solid #bfd3ca;border-radius:8px;margin-top:5px;background:white;color:#173332}
+  #label{font-size:13px;font-weight:650}.label-help{display:block;margin-top:5px;font-size:12px;font-weight:400}.label-options{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.label-options button{font-size:12px;padding:5px 10px;background:#f3f8f5}.label-options button[aria-pressed="true"]{background:#0c7068;border-color:#0c7068;color:white}input[aria-invalid="true"]{border-color:#b13f2e}td:first-child{overflow-wrap:anywhere}
+  #status{font-size:20px;font-weight:700;min-height:36px;margin-top:18px}#status.error{color:#b13f2e}#hint{min-height:25px}
+  progress{display:block;width:100%;height:8px;margin:12px 0;accent-color:#0c7068}table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0}td,th{border-bottom:1px solid #e5ece8;text-align:left;padding:8px}
+  .sample{border-top:1px solid #e5ece8;padding:20px 0 4px}.filename{font-size:13px;overflow-wrap:anywhere}canvas{display:block;width:100%;height:70px;background:#f3f8f5;border-radius:8px;margin:12px 0}audio{height:36px;width:min(340px,100%)}
+  .badge{font-size:12px;padding:3px 8px;border-radius:6px;background:#e1eeea}.warning{color:#ac4b20;font-size:13px}.footer{font-size:13px;margin-top:24px;color:#58716d}
+  @media(max-width:650px){main{padding:24px 16px}.card{padding:18px}.grid{grid-template-columns:repeat(2,1fr)}h1{font-size:27px}}
+</style>
+<link rel="stylesheet" href="../assets/lab.css">
+</head>
+<body>
+<main>
+  <nav class="lab-navigation" aria-label="실습 이동"><a href="../">← PHYSICAL AI LAB</a><div><a href="../motion/">모션</a><a href="../image/">이미지</a><a href="../audio/" aria-current="page">오디오</a></div></nav>
+  <div class="eyebrow">PHYSICAL AI · AUDIO DATASET</div>
+  <h1>ESP32 오디오 수집기</h1>
+  <p class="muted">보드의 마이크로 한 번에 한 샘플을 녹음합니다. 16 kHz · 16비트 · 모노 WAV</p>
+  <div class="steps"><span>1. USB 연결</span><span>2. 라벨 선택 · 녹음</span><span>3. ZIP 저장 · Edge Impulse 업로드</span></div>
+
+  <section class="lab-code" aria-labelledby="lab-code-title">
+    <div class="lab-code-top"><div><h2 id="lab-code-title">실습 준비 · 오디오 보드 코드</h2><p>처음 연결하거나 실습을 바꿨다면, 이 실습의 코드를 먼저 업로드하세요.</p></div><a class="lab-code-download" href="downloads/audio-code.zip" download>보드 코드 ZIP 다운로드 ↓</a></div>
+    <details><summary>보드 설정과 업로드 순서 보기</summary><div>
+      <ol><li>코드 ZIP을 압축 해제하고 <code>esp32_audio_capture/esp32_audio_capture.ino</code>를 Arduino IDE에서 엽니다.</li><li>보드 매니저에서 <strong>esp32 by Espressif Systems 3.x</strong>를 설치합니다. I²S 라이브러리는 보드 패키지에 포함되어 있습니다.</li><li>보드는 XIAO이면 <strong>XIAO_ESP32S3</strong>, WROOM이면 <strong>ESP32S3 Dev Module</strong>로 선택합니다. Flash는 XIAO 8MB, WROOM N16R8 16MB로 선택합니다.</li><li>직접 USB는 <strong>USB Mode = Hardware CDC and JTAG</strong>, <strong>USB CDC On Boot = Enabled</strong>. USB-UART 포트는 <strong>USB CDC On Boot = Disabled</strong>로 설정합니다.</li><li>업로드 후 시리얼 모니터와 플로터를 닫고, 아래에서 USB 보드를 연결합니다.</li></ol>
+      <p>XIAO는 Sense의 내장 PDM 마이크를 사용합니다. WROOM + INMP441은 SCK=GPIO4, WS=GPIO5, SD=GPIO6, L/R=GND입니다.</p>
+      <div class="lab-code-links"><a href="esp32_audio_capture/esp32_audio_capture.ino" download>INO 파일만 다운로드</a><a href="https://github.com/midnightradio/physical-ai-lab/tree/main/audio#readme" target="_blank" rel="noopener">배선·실습 안내 ↗</a></div>
+    </div></details>
+  </section>
+
+  <section class="card">
+    <h2>1. 보드 연결</h2>
+    <p class="muted">먼저 제공된 Arduino 코드를 업로드하고 시리얼 모니터와 플로터를 닫으세요.<br>이 페이지를 PC용 Chrome 또는 Edge로 열고, 보드의 USB 포트를 선택하세요.</p>
+    <div class="row"><button id="connect" class="primary">보드 연결</button><button id="disconnect" disabled>연결 해제</button><span id="device" class="muted">연결 전</span></div>
+  </section>
+
+  <section class="card">
+    <h2>2. 라벨을 고르고 녹음</h2>
+    <div class="grid">
+      <div>
+        <label for="label">라벨 · 버튼 선택 또는 직접 입력</label>
+        <input id="label" value="yes" maxlength="32" spellcheck="false" autocomplete="off" aria-describedby="label-help">
+        <small id="label-help" class="muted label-help">영문으로 시작 · 영문, 숫자, _ 또는 - · 최대 32자</small>
+        <div class="label-options" role="group" aria-label="기본 라벨 선택">
+          <button type="button" data-label="yes" aria-pressed="true">yes</button>
+          <button type="button" data-label="no" aria-pressed="false">no</button>
+          <button type="button" data-label="silent" aria-pressed="false">silent</button>
+          <button type="button" data-label="unknown" aria-pressed="false">unknown</button>
+        </div>
+      </div>
+      <label>학생 / 화자 ID<input id="speaker" value="s01" maxlength="24" pattern="[A-Za-z0-9_-]+" aria-label="학생 또는 화자 ID"></label>
+      <label>녹음 길이<select id="seconds"><option value="1">1초 · 짧은 단어</option><option value="2">2초</option><option value="3">3초</option><option value="5">5초</option></select></label>
+    </div>
+    <p class="muted" style="font-size:13px">yes / no: 한 파일에 한 단어만 말하세요. silent: 말하지 않고 실제 주변 소리를 녹음하세요.<br>모든 WAV를 audio 폴더에 모아 저장합니다. 데이터 용도는 수집 후 정리하세요.</p>
+    <button id="record" class="primary" disabled>녹음 시작 · 3초 준비</button>
+    <div id="status" role="status" aria-live="polite">보드를 연결해 주세요.</div>
+    <progress id="progress" max="1" value="0" aria-label="녹음 및 전송 진행률"></progress>
+    <p id="hint" class="muted">입력은 ESP32에 연결된 마이크입니다.</p>
+  </section>
+
+  <section class="card">
+    <div class="row between"><h2 style="margin:0">3. 녹음 확인 · 저장</h2><button id="zip" disabled>전체 WAV를 ZIP으로 저장</button></div>
+    <p class="muted">들어 보고 잘못된 샘플은 삭제하세요. 창을 닫거나 새로고침하기 전에 ZIP을 저장하세요.</p>
+    <div id="counts"></div><div id="samples"><p class="muted">아직 녹음한 샘플이 없습니다.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Edge Impulse에 업로드</h2>
+    <ol>
+      <li>저장한 ZIP을 압축 해제합니다.</li>
+      <li><a href="https://studio.edgeimpulse.com/" target="_blank" rel="noopener">Edge Impulse Studio</a>에서 프로젝트 → Data acquisition → Upload data를 엽니다.</li>
+      <li>수집을 마친 후 데이터 용도를 정리하고, Select a folder로 <b>audio 폴더</b> 또는 정리한 폴더를 선택합니다.</li>
+      <li>파일명에서 라벨을 추론하는 옵션을 사용해 업로드합니다. <code>yes.s01.…wav</code>의 라벨은 <b>yes</b>입니다.</li>
+      <li>업로드할 데이터의 용도에 맞춰 업로드 대상을 선택합니다.</li>
+      <li>샘플의 주파수 16000 Hz, 길이, 라벨을 확인합니다. Create impulse의 창 길이는 녹음 길이에 맞춥니다.</li>
+    </ol>
+    <p class="muted" style="font-size:13px">이 수집기는 WAV 파일을 PC에 저장합니다. Edge Impulse 업로드는 위의 Studio 화면에서 진행하세요.</p>
+  </section>
+  <p class="footer">외부 라이브러리 없이 동작하는 수업용 도구 · USB 통신 460800 bps · 페이지를 연 뒤 녹음 및 저장은 인터넷 연결 없이 가능</p>
+</main>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const encoder = new TextEncoder();
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const records = [];
+const DEFAULT_LABELS = ["yes","no","silent","unknown"];
+let port = null, reader = null, readTask = null, closing = false;
+let busy = false, ready = false, board = "", gain = 1, capture = null;
+
+function crc32(bytes) {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; ++bit) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+function validateWav(bytes) {
+  if (bytes.length < 44) throw new Error("WAV 헤더가 잘렸습니다.");
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const tag = pos => String.fromCharCode(...bytes.subarray(pos, pos + 4));
+  if (tag(0) !== "RIFF" || tag(8) !== "WAVE" || tag(12) !== "fmt " || tag(36) !== "data" ||
+      view.getUint32(4, true) !== bytes.length - 8 || view.getUint32(16, true) !== 16 ||
+      view.getUint16(20, true) !== 1 || view.getUint16(22, true) !== 1 ||
+      view.getUint32(24, true) !== 16000 || view.getUint32(28, true) !== 32000 ||
+      view.getUint16(32, true) !== 2 || view.getUint16(34, true) !== 16 ||
+      view.getUint32(40, true) !== bytes.length - 44 || (bytes.length - 44) % 2) {
+    throw new Error("WAV 형식이 맞지 않습니다. 제공된 Arduino 코드를 다시 업로드하세요.");
+  }
+  return view;
+}
+
+// Serial packets can be split at any byte, including inside control lines.
+class AudioProtocol {
+  constructor(onLine, onWav) { this.onLine = onLine; this.onWav = onWav; this.reset(); }
+  reset() { this.line = ""; this.frame = null; }
+  feed(bytes) {
+    let pos = 0;
+    while (pos < bytes.length) {
+      if (this.frame) {
+        const f = this.frame;
+        const n = Math.min(bytes.length - pos, f.bytes.length - f.used);
+        f.bytes.set(bytes.subarray(pos, pos + n), f.used); f.used += n; pos += n;
+        if (f.used === f.bytes.length) {
+          this.frame = null;
+          if (crc32(f.bytes) !== f.crc) throw new Error("전송 오류입니다. USB 연결을 확인하고 다시 녹음하세요.");
+          validateWav(f.bytes);
+          this.onWav(f.bytes);
+        }
+      } else {
+        const byte = bytes[pos++];
+        if (byte === 10) {
+          const line = this.line.trim(); this.line = "";
+          const match = /^WAV (\d+) ([0-9a-fA-F]{8})$/.exec(line);
+          if (match) {
+            const size = Number(match[1]);
+            if (size < 32044 || size > 160044 || (size - 44) % 32000) throw new Error("잘못된 녹음 길이입니다.");
+            this.frame = {bytes:new Uint8Array(size), used:0, crc:parseInt(match[2],16) >>> 0};
+          } else if (line) this.onLine(line);
+        } else if (byte !== 13) {
+          this.line += String.fromCharCode(byte);
+          if (this.line.length > 512) this.line = ""; // Ignore truncated boot logs.
+        }
+      }
+    }
+  }
+}
+function status(message, error = false) { $("status").textContent = message; $("status").classList.toggle("error", error); }
+function syncLabelButtons() {
+  const label = $("label").value.trim();
+  for (const button of document.querySelectorAll("[data-label]"))
+    button.setAttribute("aria-pressed", String(button.dataset.label === label));
+  $("label").removeAttribute("aria-invalid");
+}
+function controls() {
+  $("connect").disabled = busy || !!port || !("serial" in navigator);
+  $("disconnect").disabled = busy || !port;
+  $("record").disabled = busy || !ready;
+  $("zip").disabled = busy || records.length === 0;
+  for (const id of ["label","speaker","seconds"]) $(id).disabled = busy;
+  for (const button of document.querySelectorAll("[data-label]")) button.disabled = busy;
+}
+function failCapture(error) {
+  if (capture) { clearTimeout(capture.timer); const reject = capture.reject; capture = null; reject(error); }
+}
+const deviceErrors = {
+  memory:"녹음 메모리가 부족합니다. 길이를 줄이거나 PSRAM을 활성화하세요.",
+  microphone_init:"마이크 초기화 실패: 보드 선택, 배선, esp32 3.x 설치를 확인하세요.",
+  microphone_read:"마이크 읽기 실패: 배선과 마이크 모듈을 확인하세요.",
+  command:"보드 코드와 수집기 버전이 맞지 않습니다. 제공된 코드를 업로드하세요."
+};
+const protocol = new AudioProtocol(line => {
+  const hello = /^READY_AUDIO1 (XIAO_PDM|INMP441) 16000 (\d+)$/.exec(line);
+  if (hello) {
+    board = hello[1]; gain = Number(hello[2]); ready = true;
+    $("device").textContent = `${board} · 16000 Hz · 고정 게인 ${gain}`;
+  } else if (/^RECORDING /.test(line) && capture) {
+    status("녹음 중 — 지금 소리를 내세요.");
+    $("hint").textContent = `${capture.meta.seconds}초 동안 한 샘플을 녹음합니다. 잠시 후 WAV를 받습니다.`;
+  } else if (/^ERROR /.test(line)) {
+    failCapture(new Error(deviceErrors[line.slice(6)] || line));
+  }
+}, bytes => {
+  if (!capture) throw new Error("예상하지 못한 오디오입니다. 보드를 다시 연결하세요.");
+  if (bytes.length !== capture.meta.seconds * 32000 + 44) throw new Error("요청한 길이와 수신한 WAV 길이가 다릅니다.");
+  const done = capture; capture = null; clearTimeout(done.timer);
+  done.resolve(bytes);
+});
+
+async function sendCommand(command) {
+  if (!port || !port.writable) throw new Error("보드가 연결되어 있지 않습니다.");
+  const writer = port.writable.getWriter();
+  try { await writer.write(encoder.encode(command + "\n")); } finally { writer.releaseLock(); }
+}
+async function readSerial(activeReader) {
+  try {
+    while (!closing) {
+      const {value, done} = await activeReader.read();
+      if (done) break;
+      if (value) protocol.feed(value);
+    }
+    if (!closing) throw new Error("USB 연결이 끊어졌습니다. 다시 연결하세요.");
+  } catch (error) {
+    if (!closing) {
+      ready = false; failCapture(error); status(error.message, true);
+      setTimeout(() => disconnect(false), 0);
+    }
+  } finally { activeReader.releaseLock(); }
+}
+async function disconnect(showMessage = true) {
+  if (closing) return;
+  closing = true; ready = false;
+  failCapture(new Error("보드 연결이 해제되었습니다."));
+  try { if (reader) await reader.cancel(); } catch (_) {}
+  if (readTask) await readTask;
+  try { if (port) await port.close(); } catch (_) {}
+  port = null; reader = null; readTask = null; closing = false; protocol.reset();
+  $("device").textContent = "연결 전";
+  if (showMessage) status("연결을 해제했습니다.");
+  controls();
+}
+async function connect() {
+  busy = true; controls();
+  try {
+    const selected = await navigator.serial.requestPort();
+    await selected.open({baudRate:460800, bufferSize:65536});
+    port = selected; ready = false; protocol.reset();
+    // DTR enables native USB CDC; RTS stays deasserted for USB-UART bridges.
+    try { await port.setSignals({dataTerminalReady:true, requestToSend:false}); } catch (_) {}
+    reader = port.readable.getReader(); readTask = readSerial(reader);
+    status("보드 응답을 기다립니다…");
+    await sleep(1200);
+    for (let n = 0; n < 10 && !ready; ++n) { await sendCommand("PING"); await sleep(400); }
+    if (!ready) throw new Error("보드 응답이 없습니다. 업로드한 코드와 USB CDC 설정을 확인한 뒤 리셋하고 다시 연결하세요.");
+    status("준비되었습니다. 라벨을 고르고 녹음하세요.");
+  } catch (error) {
+    await disconnect(false);
+    status(error.name === "NotFoundError" ? "포트 선택이 취소되었습니다." : error.message, true);
+    $("hint").textContent = "포트를 열 수 없다면 Arduino 시리얼 모니터·플로터와 다른 수집기 창을 닫으세요.";
+  } finally { busy = false; controls(); }
+}
+
+function stamp(date = new Date()) {
+  const p = (n, len=2) => String(n).padStart(len,"0");
+  return `${date.getFullYear()}${p(date.getMonth()+1)}${p(date.getDate())}_${p(date.getHours())}${p(date.getMinutes())}${p(date.getSeconds())}_${p(date.getMilliseconds(),3)}`;
+}
+function sampleMetrics(bytes) {
+  const view = validateWav(bytes); let peak = 0, clipped = 0;
+  for (let i=44; i<bytes.length; i+=2) { const x=Math.abs(view.getInt16(i,true)); peak=Math.max(peak,x); if(x>=32760)++clipped; }
+  return {peak, clipped:clipped/((bytes.length-44)/2)};
+}
+async function record() {
+  const label = $("label").value.trim();
+  if (!/^[A-Za-z][A-Za-z0-9_-]{0,31}$/.test(label)) {
+    $("label").setAttribute("aria-invalid", "true");
+    status("라벨은 영문으로 시작하고, 영문·숫자·밑줄·하이픈을 사용해 32자 이내로 입력하세요.", true);
+    $("label").focus();
+    return;
+  }
+  $("label").value = label;
+  syncLabelButtons();
+  const speaker = $("speaker").value.trim();
+  if (!/^[A-Za-z0-9_-]{1,24}$/.test(speaker)) { status("학생 / 화자 ID는 영문, 숫자, 밑줄, 하이픈으로 입력하세요.", true); return; }
+  const meta = {label, speaker, seconds:Number($("seconds").value), board, gain};
+  busy = true; controls(); $("progress").value = 0;
+  try {
+    for (let n=3; n>0; --n) { status(`${n}초 후 준비 — ‘녹음 중’이 뜨면 시작하세요.`); await sleep(1000); }
+    status("마이크를 준비합니다…");
+    const received = new Promise((resolve,reject) => {
+      capture = {meta, resolve, reject, timer:setTimeout(() => failCapture(new Error("WAV 수신 시간이 초과되었습니다. USB를 확인하고 다시 연결하세요.")),15000+meta.seconds*3000)};
+    });
+    const [, bytes] = await Promise.all([sendCommand(`REC ${meta.seconds}`),received]);
+    const filename = `${meta.label}.${meta.speaker}.${meta.board}.g${meta.gain}.${stamp()}.wav`;
+    const metrics = sampleMetrics(bytes);
+    const item = {...meta, filename, bytes, metrics, url:URL.createObjectURL(new Blob([bytes],{type:"audio/wav"}))};
+    records.push(item); renderRecords(); $("progress").value = 1;
+    status(`저장 준비 완료 · ${meta.label} · ${meta.seconds}초`);
+    $("hint").textContent = "아래에서 소리를 들어 보고, 계속 녹음하거나 전체 ZIP을 저장하세요.";
+  } catch (error) {
+    failCapture(error); await disconnect(false); status(error.message,true);
+  } finally { busy = false; controls(); }
+}
+function drawWave(canvas, bytes) {
+  const view = validateWav(bytes), count = (bytes.length-44)/2;
+  const ctx = canvas.getContext("2d"), w=canvas.width, h=canvas.height;
+  ctx.strokeStyle="#c6dad0";ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();
+  ctx.strokeStyle="#0c7068";ctx.beginPath();
+  for(let x=0;x<w;++x){let lo=0,hi=0;for(let n=Math.floor(x*count/w);n<Math.floor((x+1)*count/w);++n){const v=view.getInt16(44+n*2,true)/32768;lo=Math.min(lo,v);hi=Math.max(hi,v);}ctx.moveTo(x,h/2-hi*h*.47);ctx.lineTo(x,h/2-lo*h*.47);}
+  ctx.stroke();
+}
+function renderRecords() {
+  const counts = $("counts"); counts.replaceChildren();
+  if(records.length){
+    const table=document.createElement("table");
+    table.innerHTML="<thead><tr><th>라벨</th><th>샘플 수</th></tr></thead>";
+    const body=document.createElement("tbody");
+    const labels = [...new Set([...DEFAULT_LABELS,...records.map(r=>r.label)])];
+    for(const label of labels){const row=document.createElement("tr");for(const value of [label,records.filter(r=>r.label===label).length]){const cell=document.createElement("td");cell.textContent=value;row.append(cell);}body.append(row);}table.append(body);counts.append(table);
+  }
+  const list = $("samples"); list.replaceChildren();
+  if(!records.length){const p=document.createElement("p");p.className="muted";p.textContent="아직 녹음한 샘플이 없습니다.";list.append(p);}
+  for(const r of [...records].reverse()){
+    const card=document.createElement("div");card.className="sample";
+    const row=document.createElement("div");row.className="row between";
+    const name=document.createElement("span");name.className="filename";name.textContent=r.filename;
+    const badge=document.createElement("span");badge.className="badge";badge.textContent=`${r.seconds}초`;row.append(name,badge);card.append(row);
+    const canvas=document.createElement("canvas");canvas.width=900;canvas.height=80;canvas.setAttribute("aria-label","녹음 파형");card.append(canvas);drawWave(canvas,r.bytes);
+    const buttons=document.createElement("div");buttons.className="row";
+    const audio=document.createElement("audio");audio.controls=true;audio.preload="none";audio.src=r.url;audio.setAttribute("aria-label",r.filename+" 재생");
+    const link=document.createElement("a");link.className="download";link.href=r.url;link.download=r.filename;link.textContent="WAV 저장";
+    const del=document.createElement("button");del.textContent="삭제";del.onclick=()=>{URL.revokeObjectURL(r.url);records.splice(records.indexOf(r),1);renderRecords();controls();};
+    buttons.append(audio,link,del);card.append(buttons);
+    let warning="";
+    if(r.metrics.peak===0)warning="입력이 모두 0입니다. 배선·마이크 선택·L/R 연결을 확인하세요.";
+    else if(r.metrics.clipped>.005)warning="소리가 찌그러질 수 있습니다. 마이크에서 조금 떨어져 다시 녹음하세요.";
+    else if(r.label!=="silent"&&r.metrics.peak<50)warning="입력이 매우 작습니다. 재생해서 목소리가 들리는지 확인하세요.";
+    if(warning){const p=document.createElement("p");p.className="warning";p.textContent=warning;card.append(p);}
+    list.append(card);
+  }
+}
+
+// Minimal uncompressed ZIP writer: no network access or third-party library.
+function makeZip(files) {
+  const local=[],central=[];let offset=0,centralSize=0;
+  for(const file of files){
+    const name=encoder.encode(file.name),data=file.bytes,crc=crc32(data);
+    const head=new Uint8Array(30+name.length),h=new DataView(head.buffer);
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(12,33,true);
+    h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);head.set(name,30);
+    local.push(head,data);
+    const entry=new Uint8Array(46+name.length),e=new DataView(entry.buffer);
+    e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint16(14,33,true);
+    e.setUint32(16,crc,true);e.setUint32(20,data.length,true);e.setUint32(24,data.length,true);e.setUint16(28,name.length,true);e.setUint32(42,offset,true);entry.set(name,46);
+    central.push(entry);centralSize+=entry.length;offset+=head.length+data.length;
+  }
+  const end=new Uint8Array(22),v=new DataView(end.buffer);
+  v.setUint32(0,0x06054b50,true);v.setUint16(8,files.length,true);v.setUint16(10,files.length,true);v.setUint32(12,centralSize,true);v.setUint32(16,offset,true);
+  return new Blob([...local,...central,end],{type:"application/zip"});
+}
+function saveZip() {
+  const blob=makeZip(records.map(r=>({name:`audio/${r.filename}`,bytes:r.bytes})));
+  const url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download=`esp32_audio_${stamp()}.zip`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  status(`${records.length}개 WAV의 ZIP 다운로드를 요청했습니다.`);
+}
+$("connect").onclick=connect;$("disconnect").onclick=()=>disconnect();$("record").onclick=record;$("zip").onclick=saveZip;
+$("label").addEventListener("input", syncLabelButtons);
+for (const button of document.querySelectorAll("[data-label]")) button.onclick = () => {
+  $("label").value = button.dataset.label;
+  syncLabelButtons();
+};
+window.addEventListener("beforeunload",event=>{if(records.length){event.preventDefault();event.returnValue="";}});
+if(!("serial" in navigator)||!window.isSecureContext){status("PC용 Chrome 또는 Edge에서 이 HTML 파일을 직접 열어 주세요.",true);$("hint").textContent="학교 PC 정책으로 USB 접근이 제한되면 담당자에게 확인하세요. HTTPS 페이지로 배포해 사용할 수도 있습니다.";}
+controls();
+</script>
+</body>
+</html>

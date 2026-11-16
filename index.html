@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ESP32-S3 모션·이미지·오디오 실습. 보드 코드를 내려받고 USB로 센서 데이터를 수집하세요.">
+  <title>Physical AI Lab · 실습 시작</title>
+  <link rel="stylesheet" href="assets/lab.css">
+</head>
+<body class="lab-home">
+  <main class="lab-shell">
+    <nav class="lab-home-nav" aria-label="메인 메뉴">
+      <a class="lab-wordmark" href="./"><span class="lab-logo" aria-hidden="true">P<span>↗</span></span>PHYSICAL AI LAB</a>
+      <a href="https://github.com/midnightradio/physical-ai-lab" target="_blank" rel="noopener">GitHub 실습 자료 ↗</a>
+    </nav>
+    <header class="lab-home-hero">
+      <div class="lab-home-kicker">ESP32-S3 · HANDS-ON LEARNING</div>
+      <h1>움직임, 이미지, 소리.<br>직접 모으는 AI 데이터.</h1>
+      <p>실습을 선택하고 보드 코드를 내려받으세요.<br>코드를 업로드한 뒤, 같은 페이지에서 USB로 데이터를 수집합니다.</p>
+      <div class="lab-requirements"><span>PC용 Chrome / Edge</span><span>Arduino IDE</span><span>데이터 전송 USB 케이블</span></div>
+    </header>
+    <section aria-labelledby="lab-choices-title">
+      <div class="lab-section-title"><h2 id="lab-choices-title">어떤 데이터를 수집할까요?</h2><span>01 — 03</span></div>
+      <div class="lab-choices">
+        <article class="lab-choice lab-motion">
+          <div class="lab-choice-top"><span class="lab-choice-number">01</span><span class="lab-format">CSV</span></div>
+          <div class="lab-choice-drawing" aria-hidden="true"><svg viewBox="0 0 240 92"><path d="M10 46H230M120 8V84" class="lab-axis"/><path d="M10 46C30 46 30 12 50 12S70 80 90 80 110 12 130 12 150 80 170 80 190 46 230 46"/></svg></div>
+          <div class="lab-choice-kicker">MOTION · MPU6050</div><h3>움직임을 읽다</h3>
+          <p>6축 신호와 3D 자세를 관찰하고,<br>라벨별 동작을 CSV로 저장합니다.</p>
+          <a class="lab-open" href="motion/">모션 실습 열기 <span aria-hidden="true">→</span></a>
+          <a class="lab-zip" href="motion/downloads/motion-code.zip" download>보드 코드 ZIP 다운로드 ↓</a>
+        </article>
+        <article class="lab-choice lab-image">
+          <div class="lab-choice-top"><span class="lab-choice-number">02</span><span class="lab-format">JPG</span></div>
+          <div class="lab-choice-drawing" aria-hidden="true"><svg viewBox="0 0 240 92"><path d="M64 19H176V77H64Z M82 19L91 9H149L158 19"/><circle cx="120" cy="48" r="20"/><circle cx="120" cy="48" r="11"/><path d="M160 30H166"/></svg></div>
+          <div class="lab-choice-kicker">IMAGE · CAMERA</div><h3>장면을 담다</h3>
+          <p>카메라로 한 장씩 또는 연속 촬영하고,<br>사진을 확인해 JPG로 저장합니다.</p>
+          <a class="lab-open" href="image/">이미지 실습 열기 <span aria-hidden="true">→</span></a>
+          <a class="lab-zip" href="image/downloads/image-code.zip" download>보드 코드 ZIP 다운로드 ↓</a>
+        </article>
+        <article class="lab-choice lab-audio">
+          <div class="lab-choice-top"><span class="lab-choice-number">03</span><span class="lab-format">WAV</span></div>
+          <div class="lab-choice-drawing" aria-hidden="true"><svg viewBox="0 0 240 92"><path d="M36 39V53M54 27V65M72 35V57M90 16V76M108 6V86M126 24V68M144 14V78M162 34V58M180 25V67M198 40V52"/></svg></div>
+          <div class="lab-choice-kicker">AUDIO · MICROPHONE</div><h3>소리를 기록하다</h3>
+          <p>마이크로 한 샘플씩 녹음하고,<br>재생해 확인한 뒤 WAV로 저장합니다.</p>
+          <a class="lab-open" href="audio/">오디오 실습 열기 <span aria-hidden="true">→</span></a>
+          <a class="lab-zip" href="audio/downloads/audio-code.zip" download>보드 코드 ZIP 다운로드 ↓</a>
+        </article>
+      </div>
+    </section>
+    <section class="lab-start" aria-labelledby="lab-start-title">
+      <div><div class="lab-home-kicker">BEFORE YOU START</div><h2 id="lab-start-title">처음이라면 이 순서로.</h2><p>보드 코드는 실습마다 다릅니다.<br>사용할 실습의 ZIP을 선택하세요.</p></div>
+      <ol><li><strong>코드 다운로드</strong><span>ZIP을 압축 해제하고 폴더 안의 .ino 파일을 Arduino IDE에서 엽니다.</span></li><li><strong>보드에 업로드</strong><span>자신의 보드와 USB 설정을 선택합니다. 자세한 안내는 ZIP의 README에 있습니다.</span></li><li><strong>웹페이지에서 수집</strong><span>시리얼 모니터와 플로터를 닫고 실습 페이지에서 USB 보드를 연결합니다.</span></li></ol>
+    </section>
+    <p class="lab-save-note">수집한 데이터는 이 브라우저 창에 보관됩니다. 실습을 마치거나 페이지를 이동하기 전에 파일로 저장하세요.</p>
+    <footer class="lab-home-footer"><span>PHYSICAL AI LAB</span><span>XIAO ESP32S3 · ESP32-S3 WROOM N16R8</span></footer>
+  </main>
+</body>
+</html>
