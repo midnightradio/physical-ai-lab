@@ -12,18 +12,40 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "_site"
 PROJECTS = {
-    "motion": "esp32_motion_capture",
-    "image": "esp32_image_capture",
-    "audio": "esp32_audio_capture",
+    "motion": ("esp32_motion_capture",),
+    "image": ("esp32_image_capture",),
+    "audio": (
+        "audio_capture_xiao_sd",
+        "audio_capture_xiao_usb",
+        "audio_capture_inmp441_usb",
+        "audio_capture_inmp441_sd",
+    ),
+}
+PROJECT_DOCS = {
+    "audio": ("START_HERE_라이브러리실습.txt", "검증안내.txt"),
 }
 
 
-def code_zip(project, sketch):
+def project_files(project, sketches):
+    """Keep each sketch's supporting files next to its canonical .ino."""
     folder = ROOT / project
-    files = {
-        "README.md": (folder / "README.md").read_bytes(),
-        f"{sketch}/{sketch}.ino": (folder / sketch / f"{sketch}.ino").read_bytes(),
-    }
+    files = {"README.md": folder / "README.md"}
+    for name in PROJECT_DOCS.get(project, ()):
+        files[name] = folder / name
+    for sketch in sketches:
+        sketch_folder = folder / sketch
+        canonical = sketch_folder / f"{sketch}.ino"
+        if not canonical.is_file():
+            raise FileNotFoundError(f"Missing Arduino sketch: {canonical}")
+        for path in sorted(sketch_folder.rglob("*")):
+            if path.is_file():
+                files[path.relative_to(folder).as_posix()] = path
+    return files
+
+
+def code_zip(project, sketches):
+    files = {name: path.read_bytes()
+             for name, path in project_files(project, sketches).items()}
     stream = BytesIO()
     with ZipFile(stream, "w", compression=ZIP_DEFLATED) as archive:
         for name, data in sorted(files.items()):
@@ -94,17 +116,18 @@ def main():
     shutil.copy2(ROOT / "index.html", OUTPUT / "index.html")
     shutil.copytree(ROOT / "assets", OUTPUT / "assets")
     (OUTPUT / ".nojekyll").touch()
-    for project, sketch in PROJECTS.items():
+    for project, sketches in PROJECTS.items():
         source = ROOT / project
         target = OUTPUT / project
         target.mkdir()
-        for name in ("index.html", "README.md"):
-            shutil.copy2(source / name, target / name)
-        (target / sketch).mkdir()
-        shutil.copy2(source / sketch / f"{sketch}.ino", target / sketch / f"{sketch}.ino")
+        shutil.copy2(source / "index.html", target / "index.html")
+        for name, path in project_files(project, sketches).items():
+            destination = target / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, destination)
         downloads = target / "downloads"
         downloads.mkdir()
-        (downloads / f"{project}-code.zip").write_bytes(code_zip(project, sketch))
+        (downloads / f"{project}-code.zip").write_bytes(code_zip(project, sketches))
     pages, links = validate_links()
     print(f"Built _site: {pages} pages, {links} local links, 3 verified Arduino code ZIPs.")
 

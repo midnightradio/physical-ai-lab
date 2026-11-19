@@ -11,7 +11,7 @@ GitHub Pages 게시 후 [실습 시작 페이지](https://midnightradio.github.i
 | --- | --- | --- | --- |
 | Motion · MPU6050 | [esp32_motion_capture.ino](motion/esp32_motion_capture/esp32_motion_capture.ino) | [모션 안내](motion/README.md) | [모션 실습](https://midnightradio.github.io/physical-ai-lab/motion/) |
 | Image · 카메라 | [esp32_image_capture.ino](image/esp32_image_capture/esp32_image_capture.ino) | [이미지 안내](image/README.md) | [이미지 실습](https://midnightradio.github.io/physical-ai-lab/image/) |
-| Audio · 마이크 | [esp32_audio_capture.ino](audio/esp32_audio_capture/esp32_audio_capture.ino) | [오디오 안내](audio/README.md) | [오디오 실습](https://midnightradio.github.io/physical-ai-lab/audio/) |
+| Audio · 마이크 | [보드별 USB·SD 예제 4개](audio/README.md#예제-선택과-다운로드) | [오디오 안내](audio/README.md) | [오디오 실습](https://midnightradio.github.io/physical-ai-lab/audio/) |
 
 1. 실습 페이지에서 **보드 코드 ZIP 다운로드**를 누릅니다.
 2. ZIP을 압축 해제하고, 스케치 폴더 안의 같은 이름 `.ino` 파일을 Arduino IDE로 엽니다.
@@ -42,8 +42,12 @@ physical-ai-lab/
 ├── audio/
 │   ├── index.html
 │   ├── README.md
-│   └── esp32_audio_capture/
-│       └── esp32_audio_capture.ino
+│   ├── audio_capture_xiao_sd/
+│   ├── audio_capture_xiao_usb/
+│   ├── audio_capture_inmp441_usb/
+│   ├── audio_capture_inmp441_sd/
+│   ├── START_HERE_라이브러리실습.txt
+│   └── 검증안내.txt
 ├── tools/build_site.py             # 웹 배포 파일·코드 ZIP 생성 및 링크 검증
 └── .github/workflows/pages.yml     # main에 push하면 ZIP 생성 후 Pages 배포
 ```
@@ -54,7 +58,7 @@ physical-ai-lab/
 - `image/downloads/image-code.zip`
 - `audio/downloads/audio-code.zip`
 
-ZIP에는 `README.md`와 스케치 폴더가 들어 있습니다. Arduino IDE가 요구하는 폴더명과 `.ino` 파일명을 유지합니다.
+ZIP에는 `README.md`와 각 실습의 스케치 폴더가 들어 있습니다. 오디오는 보드별 USB·SD 예제 4개와 USB 통신 보조 파일 `CollectorLink.h`, 상세 안내를 함께 제공합니다. Arduino IDE가 요구하는 폴더명과 `.ino` 파일명을 유지합니다.
 생성 파일은 `_site/`에만 두며, 저장소에는 중복 커밋하지 않습니다.
 
 ## GitHub Pages 최초 설정
@@ -86,5 +90,5 @@ python3 -m http.server 8080 --directory _site
 ## 확인 범위
 
 기존 수집기와 보드 코드에 실습 간 이동·코드 다운로드·웹 사용 안내를 추가한 배포 구성입니다.
-수집기의 통신 처리와 센서 코드는 이 구성 작업에서 변경하지 않았습니다.
+오디오 예제는 공식 ESP_I2S의 recordWAV() 기반이며, 보드별 USB·SD 구성을 제공합니다. 자세한 사용법과 확인 범위는 각 실습 폴더의 안내를 참고하세요.
 실제 보드 업로드, 배선과 수집 상태는 수업 전에 보드별로 확인하세요.

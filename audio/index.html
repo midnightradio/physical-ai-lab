@@ -34,22 +34,34 @@
   <div class="steps"><span>1. USB 연결</span><span>2. 라벨 선택 · 녹음</span><span>3. ZIP 저장 · Edge Impulse 업로드</span></div>
 
   <section class="lab-code" aria-labelledby="lab-code-title">
-    <div class="lab-code-top"><div><h2 id="lab-code-title">실습 준비 · 오디오 보드 코드</h2><p>처음 연결하거나 실습을 바꿨다면, 이 실습의 코드를 먼저 업로드하세요.</p></div><a class="lab-code-download" href="downloads/audio-code.zip" download>보드 코드 ZIP 다운로드 ↓</a></div>
-    <details><summary>보드 설정과 업로드 순서 보기</summary><div>
-      <ol><li>코드 ZIP을 압축 해제하고 <code>esp32_audio_capture/esp32_audio_capture.ino</code>를 Arduino IDE에서 엽니다.</li><li>보드 매니저에서 <strong>esp32 by Espressif Systems 3.x</strong>를 설치합니다. I²S 라이브러리는 보드 패키지에 포함되어 있습니다.</li><li>보드는 XIAO이면 <strong>XIAO_ESP32S3</strong>, WROOM이면 <strong>ESP32S3 Dev Module</strong>로 선택합니다. Flash는 XIAO 8MB, WROOM N16R8 16MB로 선택합니다.</li><li>직접 USB는 <strong>USB Mode = Hardware CDC and JTAG</strong>, <strong>USB CDC On Boot = Enabled</strong>. USB-UART 포트는 <strong>USB CDC On Boot = Disabled</strong>로 설정합니다.</li><li>업로드 후 시리얼 모니터와 플로터를 닫고, 아래에서 USB 보드를 연결합니다.</li></ol>
-      <p>XIAO는 Sense의 내장 PDM 마이크를 사용합니다. WROOM + INMP441은 SCK=GPIO4, WS=GPIO5, SD=GPIO6, L/R=GND입니다.</p>
-      <div class="lab-code-links"><a href="esp32_audio_capture/esp32_audio_capture.ino" download>INO 파일만 다운로드</a><a href="https://github.com/midnightradio/physical-ai-lab/tree/main/audio#readme" target="_blank" rel="noopener">배선·실습 안내 ↗</a></div>
+    <div class="lab-code-top"><div><h2 id="lab-code-title">실습 준비 · 오디오 보드 코드</h2><p>보드별 USB·SD 예제 4개와 사용 안내가 들어 있습니다. 아래 웹 수집기에는 USB 예제를 올려 연결하세요.</p></div><a class="lab-code-download" href="downloads/audio-code.zip" download>보드 코드 ZIP 다운로드</a></div>
+    <details><summary>보드별 예제와 업로드 순서 보기</summary><div>
+      <div style="overflow-x:auto"><table><thead><tr><th>장치 · 저장 위치</th><th>Arduino IDE에서 열 파일</th></tr></thead><tbody>
+        <tr><td>XIAO Sense · 웹 수집기</td><td><code>audio_capture_xiao_usb/audio_capture_xiao_usb.ino</code></td></tr>
+        <tr><td>WROOM + INMP441 · 웹 수집기</td><td><code>audio_capture_inmp441_usb/audio_capture_inmp441_usb.ino</code></td></tr>
+        <tr><td>XIAO Sense · 내장 microSD</td><td><code>audio_capture_xiao_sd/audio_capture_xiao_sd.ino</code></td></tr>
+        <tr><td>WROOM CAM + INMP441 · 내장 microSD</td><td><code>audio_capture_inmp441_sd/audio_capture_inmp441_sd.ino</code></td></tr>
+      </tbody></table></div>
+      <ol><li>코드 ZIP을 압축 해제하고 사용할 예제 폴더 안의 같은 이름 <code>.ino</code>를 엽니다. USB 예제는 <code>CollectorLink.h</code>도 같은 폴더에 둡니다.</li>
+        <li>보드 매니저에서 <strong>esp32 by Espressif Systems 3.3.12</strong>를 설치합니다. 녹음은 공식 <code>ESP_I2S.recordWAV()</code>를 사용하며, 추가 오디오 라이브러리는 설치하지 않습니다.</li>
+        <li>보드는 XIAO이면 <strong>XIAO_ESP32S3</strong>, WROOM이면 <strong>ESP32S3 Dev Module</strong>로 선택합니다. <strong>PSRAM = OPI PSRAM</strong>을 활성화하고 Flash는 XIAO 8MB, WROOM N16R8 16MB로 선택합니다.</li>
+        <li>직접 USB는 <strong>USB Mode = Hardware CDC and JTAG</strong>, <strong>USB CDC On Boot = Enabled</strong>. USB-UART 포트는 <strong>USB CDC On Boot = Disabled</strong>로 설정합니다.</li>
+        <li>USB 예제 업로드 후 시리얼 모니터·플로터를 닫고 아래에서 보드를 연결합니다. SD 예제는 시리얼 모니터를 <strong>115200</strong>으로 열어 <strong>r</strong>을 보냅니다.</li>
+      </ol>
+      <p><strong>WROOM의 변경된 INMP441 배선:</strong> SCK=GPIO1, WS=GPIO2, SD=GPIO42, L/R=GND, VDD=3V3, GND=GND. XIAO는 Sense 확장 보드의 내장 PDM 마이크를 사용합니다.</p>
+      <p>SD 예제는 보드의 microSD 슬롯을 사용합니다. WROOM은 내부 CLK39·CMD38·D0 40, XIAO는 내부 CS21이며 SD용 점퍼선은 추가하지 않습니다. SD 녹음 길이는 <code>RECORD_SECONDS</code>로 지정합니다.</p>
+      <div class="lab-code-links"><a href="https://github.com/midnightradio/physical-ai-lab/tree/main/audio#readme" target="_blank" rel="noopener">코드·배선·실습 안내</a></div>
     </div></details>
   </section>
 
   <section class="card">
     <h2>1. 보드 연결</h2>
-    <p class="muted">먼저 제공된 Arduino 코드를 업로드하고 시리얼 모니터와 플로터를 닫으세요.<br>이 페이지를 PC용 Chrome 또는 Edge로 열고, 보드의 USB 포트를 선택하세요.</p>
+    <p class="muted">먼저 자신의 보드에 맞는 USB 예제를 업로드하고 시리얼 모니터와 플로터를 닫으세요.<br>이 페이지를 PC용 Chrome 또는 Edge로 열고, 보드의 USB 포트를 선택하세요.</p>
     <div class="row"><button id="connect" class="primary">보드 연결</button><button id="disconnect" disabled>연결 해제</button><span id="device" class="muted">연결 전</span></div>
   </section>
 
   <section class="card">
-    <h2>2. 라벨을 고르고 녹음</h2>
+    <h2>2. 라벨을 선택하고 녹음</h2>
     <div class="grid">
       <div>
         <label for="label">라벨 · 버튼 선택 또는 직접 입력</label>
@@ -63,7 +75,7 @@
         </div>
       </div>
       <label>학생 / 화자 ID<input id="speaker" value="s01" maxlength="24" pattern="[A-Za-z0-9_-]+" aria-label="학생 또는 화자 ID"></label>
-      <label>녹음 길이<select id="seconds"><option value="1">1초 · 짧은 단어</option><option value="2">2초</option><option value="3">3초</option><option value="5">5초</option></select></label>
+      <label>녹음 길이<select id="seconds"><option value="1">1초 · 짧은 단어</option><option value="2">2초</option><option value="3">3초</option><option value="5">5초</option><option value="10">10초</option></select></label>
     </div>
     <p class="muted" style="font-size:13px">yes / no: 한 파일에 한 단어만 말하세요. silent: 말하지 않고 실제 주변 소리를 녹음하세요.<br>모든 WAV를 audio 폴더에 모아 저장합니다. 데이터 용도는 수집 후 정리하세요.</p>
     <button id="record" class="primary" disabled>녹음 시작 · 3초 준비</button>
@@ -149,7 +161,7 @@ class AudioProtocol {
           const match = /^WAV (\d+) ([0-9a-fA-F]{8})$/.exec(line);
           if (match) {
             const size = Number(match[1]);
-            if (size < 32044 || size > 160044 || (size - 44) % 32000) throw new Error("잘못된 녹음 길이입니다.");
+            if (size < 32044 || size > 320044 || (size - 44) % 32000) throw new Error("잘못된 녹음 길이입니다.");
             this.frame = {bytes:new Uint8Array(size), used:0, crc:parseInt(match[2],16) >>> 0};
           } else if (line) this.onLine(line);
         } else if (byte !== 13) {
@@ -247,7 +259,7 @@ async function connect() {
     await sleep(1200);
     for (let n = 0; n < 10 && !ready; ++n) { await sendCommand("PING"); await sleep(400); }
     if (!ready) throw new Error("보드 응답이 없습니다. 업로드한 코드와 USB CDC 설정을 확인한 뒤 리셋하고 다시 연결하세요.");
-    status("준비되었습니다. 라벨을 고르고 녹음하세요.");
+    status("준비되었습니다. 라벨을 선택하고 녹음하세요.");
   } catch (error) {
     await disconnect(false);
     status(error.name === "NotFoundError" ? "포트 선택이 취소되었습니다." : error.message, true);
