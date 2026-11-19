@@ -1,3 +1,18 @@
+# At each lab root, allow README.md, index.html, and all subdirectories.
+/motion/*
+!/motion/*/
+!/motion/README.md
+!/motion/index.html
+/audio/*
+!/audio/*/
+!/audio/README.md
+!/audio/index.html
+/image/*
+!/image/*/
+!/image/README.md
+!/image/index.html
+
+# Generated files remain excluded, including inside allowed subdirectories.
 _site/
 __pycache__/
 *.pyc

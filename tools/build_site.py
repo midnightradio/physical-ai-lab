@@ -21,17 +21,12 @@ PROJECTS = {
         "audio_capture_inmp441_sd",
     ),
 }
-PROJECT_DOCS = {
-    "audio": ("START_HERE_라이브러리실습.txt", "검증안내.txt"),
-}
 
 
 def project_files(project, sketches):
     """Keep each sketch's supporting files next to its canonical .ino."""
     folder = ROOT / project
     files = {"README.md": folder / "README.md"}
-    for name in PROJECT_DOCS.get(project, ()):
-        files[name] = folder / name
     for sketch in sketches:
         sketch_folder = folder / sketch
         canonical = sketch_folder / f"{sketch}.ino"

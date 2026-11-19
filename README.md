@@ -45,9 +45,7 @@ physical-ai-lab/
 │   ├── audio_capture_xiao_sd/
 │   ├── audio_capture_xiao_usb/
 │   ├── audio_capture_inmp441_usb/
-│   ├── audio_capture_inmp441_sd/
-│   ├── START_HERE_라이브러리실습.txt
-│   └── 검증안내.txt
+│   └── audio_capture_inmp441_sd/
 ├── tools/build_site.py             # 웹 배포 파일·코드 ZIP 생성 및 링크 검증
 └── .github/workflows/pages.yml     # main에 push하면 ZIP 생성 후 Pages 배포
 ```
@@ -58,7 +56,7 @@ physical-ai-lab/
 - `image/downloads/image-code.zip`
 - `audio/downloads/audio-code.zip`
 
-ZIP에는 `README.md`와 각 실습의 스케치 폴더가 들어 있습니다. 오디오는 보드별 USB·SD 예제 4개와 USB 통신 보조 파일 `CollectorLink.h`, 상세 안내를 함께 제공합니다. Arduino IDE가 요구하는 폴더명과 `.ino` 파일명을 유지합니다.
+ZIP에는 `README.md`와 각 실습의 스케치 폴더가 들어 있습니다. 오디오는 보드별 USB·SD 예제 4개와 USB 통신 보조 파일 `CollectorLink.h`를 함께 제공합니다. 보드 설정과 실습 안내는 `README.md`에서 확인합니다. Arduino IDE가 요구하는 폴더명과 `.ino` 파일명을 유지합니다.
 생성 파일은 `_site/`에만 두며, 저장소에는 중복 커밋하지 않습니다.
 
 ## GitHub Pages 최초 설정
